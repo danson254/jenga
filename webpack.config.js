@@ -1,6 +1,26 @@
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
+const fs = require('fs');
+
+// Define copy patterns with error handling
+const copyPatterns = [];
+
+// Check if css directory exists and add it to patterns
+const cssPath = path.resolve(__dirname, 'src/client/css');
+if (fs.existsSync(cssPath)) {
+  copyPatterns.push({ from: 'src/client/css', to: 'css' });
+} else {
+  console.warn('Warning: css directory not found at', cssPath);
+}
+
+// Check if assets directory exists and add it to patterns
+const assetsPath = path.resolve(__dirname, 'src/client/assets');
+if (fs.existsSync(assetsPath)) {
+  copyPatterns.push({ from: 'src/client/assets', to: 'assets' });
+} else {
+  console.warn('Warning: assets directory not found at', assetsPath);
+}
 
 module.exports = {
   entry: './src/client/js/app.js',
@@ -31,12 +51,8 @@ module.exports = {
       template: './src/client/index.html',
       filename: 'index.html'
     }),
-    new CopyWebpackPlugin({
-      patterns: [
-        { from: 'src/client/css', to: 'css' },
-        { from: 'src/client/assets', to: 'assets' }
-      ]
-    })
+    // Only add CopyWebpackPlugin if there are patterns to copy
+    ...(copyPatterns.length > 0 ? [new CopyWebpackPlugin({ patterns: copyPatterns })] : [])
   ],
   devServer: {
     static: {
